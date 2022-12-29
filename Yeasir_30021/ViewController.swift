@@ -13,21 +13,16 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var topView: UIView!
     @IBOutlet weak var downloadsTitle: UILabel!
+    
     @IBOutlet weak var tasksView: UIView!
-    @IBOutlet weak var mainDownloadPrgress: UIProgressView!
     @IBOutlet weak var downloadsView: UIView!
-    var timer = Timer()
+    
+    @IBOutlet weak var mainDownloadPrgress: UIProgressView!
     @IBOutlet weak var taskProgressOne: UIProgressView!
     @IBOutlet weak var taskProgressTwo: UIProgressView!
     @IBOutlet weak var taskProgressThree: UIProgressView!
     @IBOutlet weak var taskProgressFour: UIProgressView!
     
-    
-    let customSerialQ = DispatchQueue(label: "com.custom.serial")
-    
-    let globalQ = DispatchQueue.global()
-    
-    let mainQ = DispatchQueue.main
     
     var progressValue: Float  = 0.00
     var taskOneProgressValue: Float = 0.00
@@ -53,6 +48,7 @@ class ViewController: UIViewController {
 
 // MARK: - Q config
 extension ViewController{
+    // MARK: Reset Progress
     fileprivate func resetProgress() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else{return}
@@ -78,6 +74,8 @@ extension ViewController{
         self.taskProgressFour.progress = self.taskFourProgressValue
     }
     
+    
+    // MARK: Queue functions
     func qAsync(Q: DispatchQueue){
         downloadQ.async {
             Q.async {
@@ -182,6 +180,8 @@ extension ViewController{
                 }
             }
             
+            
+            
             Q.sync {
                 for _ in 1...100{
                     DispatchQueue.main.async {[weak self] in
@@ -220,21 +220,27 @@ extension ViewController{
 // MARK: - Alert controller
 
 extension ViewController{
+    
     func showAlert(){
         let alertVC = UIAlertController(title: "Available Actions", message: "Select Actions",  preferredStyle: .actionSheet)
-        let globalQueueConcurrentSync = UIAlertAction(title: "Global Sync", style: .default){ [weak self]_ in
+        
+           let globalQueueConcurrentSync = UIAlertAction(title: "Global Sync", style: .default){ [weak self]_ in
             self?.qSync(Q: DispatchQueue.global())
             }
+        
             let globalQueueConcurrentAsync = UIAlertAction(title: "Global Async", style: .default){ [weak self]_ in
                 self?.qAsync(Q: DispatchQueue.global())
             }
+        
             let customPrivateQueueSerialSync = UIAlertAction(title: "Custom Serial Sync", style: .default){ [weak self]_ in
                 self?.qSync(Q: DispatchQueue(label: "serial.sync"))
             }
+        
             let customPrivateQueueSerialAsync = UIAlertAction(title: "Custom Serial Async", style: .default){ [weak self]_ in
                 self?.qAsync(Q: DispatchQueue(label: "custom serial async"))
                 
             }
+        
             let customPrivateQueueConcurrentsync = UIAlertAction(title: "Custom Concurrent Sync", style: .default){ [weak self]_ in
                 self?.qSync(Q: DispatchQueue(label: "Custom Concurrent Sync", attributes: .concurrent))
             }
