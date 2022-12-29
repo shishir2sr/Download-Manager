@@ -8,7 +8,9 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
+    var downloadQ = DispatchQueue(label: "com.downlaodq.concurrent", attributes: .concurrent)
+    
     @IBOutlet weak var topView: UIView!
     @IBOutlet weak var downloadsTitle: UILabel!
     @IBOutlet weak var tasksView: UIView!
@@ -19,6 +21,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var taskProgressTwo: UIProgressView!
     @IBOutlet weak var taskProgressThree: UIProgressView!
     @IBOutlet weak var taskProgressFour: UIProgressView!
+    
     var v2: Float = 0.0
     let customSerialQ = DispatchQueue(label: "com.custom.serial")
     
@@ -37,51 +40,143 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configUI()
-       startProgress()
-        
     }
     
      
     
+    fileprivate func resetProgress() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else{return}
+            self.taskProgressOne.progressTintColor = UIColor.red
+            self.taskProgressTwo.progressTintColor = UIColor.red
+            self.taskProgressThree.progressTintColor = UIColor.red
+            self.taskProgressFour.progressTintColor = UIColor.red
+        }
+        
+        self.progressValue = 0.0
+        self.mainDownloadPrgress.progress = self.progressValue
+        
+        self.taskOneProgressValue = 0.00
+        self.taskProgressOne.progress = self.taskOneProgressValue
+        self.taskTwoProgressValue = 0.00
+        self.taskProgressTwo.progress = self.taskTwoProgressValue
+        self.taskThreeProgressValue = 0.00
+        self.taskProgressThree.progress = self.taskThreeProgressValue
+        self.taskFourProgressValue = 0.00
+        self.taskProgressFour.progress = self.taskFourProgressValue
+    }
     
-    func startProgress(){
-        let globalQueue = DispatchQueue.global()
-        DispatchQueue.global().async {
-            globalQueue.async {
+    func qAsync(Q: DispatchQueue){
+        downloadQ.async {
+            Q.async {
                 for _ in 1...100{
                     DispatchQueue.main.async {[weak self] in
-                        self?.setProgressOne(progessRate: (1.0/100.0))
-                        self?.setOverallProgress(progessRate: 1.0/400)
+                        guard let self = self else{return}
+
+                        self.setProgress(progessRate: 0.01, progressInd: self.taskProgressOne, taskProgressVal: &self.taskOneProgressValue)
+                        
+                        self.setOverallProgress(progessRate: 1.0/400.0)
+                    }
+                    Thread.sleep(forTimeInterval: 0.03)
+                }
+               
+            }
+            
+            Q.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        guard let self = self else{return}
+                        
+                        self.setProgress(progessRate: 1.0/100, progressInd: self.taskProgressTwo, taskProgressVal: &self.taskTwoProgressValue)
+                        
+                        self.setOverallProgress(progessRate: 1.0/400.0)
+                        
+                    }
+                    Thread.sleep(forTimeInterval: 0.05)
+                }
+                
+            }
+            Q.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        
+                        guard let self = self else{return}
+                        self.setProgress(progessRate: 1.0/100, progressInd: self.taskProgressThree, taskProgressVal: &self.taskThreeProgressValue)
+                        
+                        self.setOverallProgress(progessRate: 1.0/400.0)
+                        
+                    }
+                    Thread.sleep(forTimeInterval: 0.04)
+                }
+                
+            }
+            Q.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        guard let self = self else{return}
+                        self.setProgress(progessRate: 1.0/100, progressInd: self.taskProgressFour, taskProgressVal: &self.taskFourProgressValue)
+                        self.setOverallProgress(progessRate: 0.0025)
+                        
                     }
                     Thread.sleep(forTimeInterval: 0.02)
+                }
+               
+            }
+        }
+    }
+    
+    
+    func qSync(Q: DispatchQueue){
+        
+        downloadQ.async {
+            Q.sync {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        guard let self = self else{return}
+                        
+                        self.setProgress(progessRate: 0.01, progressInd: self.taskProgressOne, taskProgressVal: &self.taskOneProgressValue)
+                        
+                        self.setOverallProgress(progessRate: 1.0/400.0)
+                    }
+                    Thread.sleep(forTimeInterval: 0.03)
                 }
             }
             
-            globalQueue.async {
+            Q.sync {
                 for _ in 1...100{
                     DispatchQueue.main.async {[weak self] in
-                        self?.setProgressTwo(progessRate: (1.0/100.0))
-                        self?.setOverallProgress(progessRate: 1.0/400)
+                        guard let self = self else{return}
+                        
+                        self.setProgress(progessRate: 1.0/100, progressInd: self.taskProgressTwo, taskProgressVal: &self.taskTwoProgressValue)
+                        
+                        self.setOverallProgress(progessRate: 1.0/400.0)
                         
                     }
-                    Thread.sleep(forTimeInterval: 0.02)
+                    Thread.sleep(forTimeInterval: 0.05)
                 }
             }
-            globalQueue.async {
+            
+            Q.sync {
                 for _ in 1...100{
                     DispatchQueue.main.async {[weak self] in
-                        self?.setProgressThree(progessRate: (1.0/100.0))
-                        self?.setOverallProgress(progessRate: 1.0/400)
+                        
+                        guard let self = self else{return}
+                        self.setProgress(progessRate: 1.0/100, progressInd: self.taskProgressThree, taskProgressVal: &self.taskThreeProgressValue)
+                        
+                        self.setOverallProgress(progessRate: 1.0/400.0)
                         
                     }
-                    Thread.sleep(forTimeInterval: 0.02)
+                    Thread.sleep(forTimeInterval: 0.04)
                 }
             }
-            globalQueue.async {
+            
+            Q.sync {
                 for _ in 1...100{
                     DispatchQueue.main.async {[weak self] in
-                        self?.setProgressFour(progessRate: (1.0/100.0))
-                        self?.setOverallProgress(progessRate: 1.0/400)
+                        guard let self = self else{return}
+                        self.setProgress(progessRate: 1.0/100, progressInd: self.taskProgressFour, taskProgressVal: &self.taskFourProgressValue)
+                        self.setOverallProgress(progessRate: 0.0025)
+                        
                         
                     }
                     Thread.sleep(forTimeInterval: 0.02)
@@ -90,63 +185,29 @@ class ViewController: UIViewController {
         }
     }
     
-    func setProgressOne(progessRate: Double){
-        taskOneProgressValue = taskOneProgressValue + Float(progessRate)
-        taskProgressOne.setProgress(Float(taskOneProgressValue), animated: true)
-        print(taskOneProgressValue)
-        if taskOneProgressValue >= 0.99{
-            taskProgressOne.progressTintColor = UIColor.green
-        }
-    }
     
-    func setProgressTwo(progessRate: Double){
-        taskTwoProgressValue = taskTwoProgressValue + Float(progessRate)
-        taskProgressTwo.setProgress(Float(taskTwoProgressValue), animated: true)
-        if taskTwoProgressValue >= 0.99{
-            taskProgressTwo.progressTintColor = UIColor.green
-        }
-    }
-    
-    func setProgressThree(progessRate: Double){
-        taskThreeProgressValue = taskThreeProgressValue + Float(progessRate)
-        taskProgressThree.setProgress(Float(taskThreeProgressValue), animated: true)
-        if taskThreeProgressValue >= 0.99{
-            taskProgressThree.progressTintColor = UIColor.green
-        }
-    }
-    func setProgressFour(progessRate: Double){
-        taskFourProgressValue = taskFourProgressValue + Float(progessRate)
-        taskProgressFour.setProgress(Float(taskFourProgressValue), animated: true)
-        if taskFourProgressValue >= 0.99{
-            taskProgressFour.progressTintColor = UIColor.green
+    func setProgress(progessRate: Float, progressInd: UIProgressView, taskProgressVal: inout Float){
+        taskProgressVal += progessRate
+        progressInd.setProgress(Float(taskProgressVal), animated: false)
+        if taskProgressVal >= 0.99{
+            progressInd.progressTintColor = UIColor.systemGreen
         }
     }
     
     func setOverallProgress(progessRate: Double){
+        
         progressValue = progressValue + Float(progessRate)
-        mainDownloadPrgress.setProgress(Float(progressValue), animated: true)
+        mainDownloadPrgress.setProgress(Float(progressValue), animated: false)
     }
     
-    
-    
-
-    
-    
-    
-    
-  
     
     
     @IBAction func downloadButtonPressed(_ sender: Any) {
-        showAlert()
+    self.resetProgress()
+    showAlert()
     }
     
     
-    
-
-    
-    
-
     
     fileprivate func configUI() {
         topView.layer.cornerRadius = 20
@@ -157,31 +218,36 @@ class ViewController: UIViewController {
         
         mainDownloadPrgress.transform = mainDownloadPrgress.transform.scaledBy(x: 1, y: 8)
         
-        taskProgressOne.transform = taskProgressOne.transform.scaledBy(x: 1, y: 10)
-        taskProgressTwo.transform = taskProgressTwo.transform.scaledBy(x: 1, y: 10)
-        taskProgressThree.transform = taskProgressThree.transform.scaledBy(x: 1, y: 10)
-        taskProgressFour.transform = taskProgressFour.transform.scaledBy(x: 1, y: 10)
+        taskProgressOne.transform = taskProgressOne.transform.scaledBy(x: 1, y: 5)
+        taskProgressTwo.transform = taskProgressTwo.transform.scaledBy(x: 1, y: 5)
+        taskProgressThree.transform = taskProgressThree.transform.scaledBy(x: 1, y: 5)
+        taskProgressFour.transform = taskProgressFour.transform.scaledBy(x: 1, y: 5)
     }
     
     
     func showAlert(){
-            let alertVC = UIAlertController(title: "Available Actions", message: "Select Actions", preferredStyle: .actionSheet)
-            let globalQueueConcurrentSync = UIAlertAction(title: "globalQueueConcurrentSync", style: .destructive){ [weak self]_ in
-//                self?.progressRunning()
+        let alertVC = UIAlertController(title: "Available Actions", message: "Select Actions",  preferredStyle: .actionSheet)
+        let globalQueueConcurrentSync = UIAlertAction(title: "Global Sync", style: .default){ [weak self]_ in
+            self?.qSync(Q: DispatchQueue.global())
             }
-            let globalQueueConcurrentAsync = UIAlertAction(title: "globalQueueConcurrentAsync", style: .destructive){ [weak self]_ in
-//                self?.globalQueueConcurrentAsync()
+            let globalQueueConcurrentAsync = UIAlertAction(title: "Global Async", style: .default){ [weak self]_ in
+                self?.qAsync(Q: DispatchQueue.global())
             }
-            let customPrivateQueueSerialSync = UIAlertAction(title: "customPrivateQueueSerialSync", style: .destructive){ [weak self]_ in
-//                self?.customPrivateQueueSerialSync()
+            let customPrivateQueueSerialSync = UIAlertAction(title: "Custom Serial Sync", style: .default){ [weak self]_ in
+                self?.qSync(Q: DispatchQueue(label: "serial.sync"))
             }
-            let customPrivateQueueSerialAsync = UIAlertAction(title: "customPrivateQueueSerialAsync", style: .destructive){ [weak self]_ in
-//                self?.customPrivateQueueSerialAsync()
+            let customPrivateQueueSerialAsync = UIAlertAction(title: "Custom Serial Async", style: .default){ [weak self]_ in
+                self?.qAsync(Q: DispatchQueue(label: "custom serial async"))
+                
             }
-            let customPrivateQueueConcurrentAsync = UIAlertAction(title: "customPrivateQueueConcurrentAsync", style: .destructive){ [weak self]_ in
-//                self?.customPrivateQueueConcurrentAsync()
+            let customPrivateQueueConcurrentsync = UIAlertAction(title: "Custom Concurrent Sync", style: .default){ [weak self]_ in
+                self?.qSync(Q: DispatchQueue(label: "Custom Concurrent Sync", attributes: .concurrent))
             }
-            let goBackAction = UIAlertAction(title: "Go Back", style: .destructive){_ in
+        
+        let customPrivateQueueConcurrentAsync = UIAlertAction(title: "Custom Concurrent Async", style: .default){ [weak self]_ in
+            self?.qAsync(Q: DispatchQueue(label: "Custom Concurrent Aync", attributes: .concurrent))
+        }
+            let goBackAction = UIAlertAction(title: "Go Back", style: .default){_ in
                 alertVC.dismiss(animated: true)
             }
             alertVC.addAction(globalQueueConcurrentSync)
@@ -189,6 +255,7 @@ class ViewController: UIViewController {
             alertVC.addAction(customPrivateQueueSerialSync)
             alertVC.addAction(customPrivateQueueSerialAsync)
             alertVC.addAction(customPrivateQueueConcurrentAsync)
+            alertVC.addAction(customPrivateQueueConcurrentsync)
             alertVC.addAction(goBackAction)
             present(alertVC, animated: true)
         }
@@ -211,6 +278,46 @@ class ViewController: UIViewController {
  if taskFourProgressValue < 1.0 {
      taskFourProgressValue += 0.01
      taskProgressFour.progress = taskFourProgressValue
+ }
+ 
+ 
+ 
+ func setProgressOne(progessRate: Double){
+     taskOneProgressValue = taskOneProgressValue + Float(progessRate)
+     taskProgressOne.setProgress(Float(taskOneProgressValue), animated: true)
+     print(taskOneProgressValue)
+     if taskOneProgressValue >= 0.99{
+         taskProgressOne.progressTintColor = UIColor.green
+     }
+ }
+ 
+ func setProgressTwo(progessRate: Double){
+     taskTwoProgressValue = taskTwoProgressValue + Float(progessRate)
+     taskProgressTwo.setProgress(Float(taskTwoProgressValue), animated: true)
+     if taskTwoProgressValue >= 0.99{
+         taskProgressTwo.progressTintColor = UIColor.green
+     }
+ }
+ 
+ func setProgressThree(progessRate: Double){
+     taskThreeProgressValue = taskThreeProgressValue + Float(progessRate)
+     taskProgressThree.setProgress(Float(taskThreeProgressValue), animated: true)
+     if taskThreeProgressValue >= 0.99{
+         taskProgressThree.progressTintColor = UIColor.green
+     }
+ }
+ 
+ func setProgressFour(progessRate: Double){
+     taskFourProgressValue = taskFourProgressValue + Float(progessRate)
+     taskProgressFour.setProgress(Float(taskFourProgressValue), animated: true)
+     if taskFourProgressValue >= 0.99{
+         taskProgressFour.progressTintColor = UIColor.green
+     }
+ }
+ 
+ func setOverallProgress(progessRate: Double){
+     progressValue = progressValue + Float(progessRate)
+     mainDownloadPrgress.setProgress(Float(progressValue), animated: true)
  }
  */
 
