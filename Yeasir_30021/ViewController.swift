@@ -19,6 +19,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var taskProgressTwo: UIProgressView!
     @IBOutlet weak var taskProgressThree: UIProgressView!
     @IBOutlet weak var taskProgressFour: UIProgressView!
+    var v2: Float = 0.0
     let customSerialQ = DispatchQueue(label: "com.custom.serial")
     
     let globalQ = DispatchQueue.global()
@@ -36,9 +37,105 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configUI()
-      
+       startProgress()
         
     }
+    
+     
+    
+    
+    func startProgress(){
+        let globalQueue = DispatchQueue.global()
+        DispatchQueue.global().async {
+            globalQueue.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        self?.setProgressOne(progessRate: (1.0/100.0))
+                        self?.setOverallProgress(progessRate: 1.0/400)
+                    }
+                    Thread.sleep(forTimeInterval: 0.02)
+                }
+            }
+            
+            globalQueue.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        self?.setProgressTwo(progessRate: (1.0/100.0))
+                        self?.setOverallProgress(progessRate: 1.0/400)
+                        
+                    }
+                    Thread.sleep(forTimeInterval: 0.02)
+                }
+            }
+            globalQueue.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        self?.setProgressThree(progessRate: (1.0/100.0))
+                        self?.setOverallProgress(progessRate: 1.0/400)
+                        
+                    }
+                    Thread.sleep(forTimeInterval: 0.02)
+                }
+            }
+            globalQueue.async {
+                for _ in 1...100{
+                    DispatchQueue.main.async {[weak self] in
+                        self?.setProgressFour(progessRate: (1.0/100.0))
+                        self?.setOverallProgress(progessRate: 1.0/400)
+                        
+                    }
+                    Thread.sleep(forTimeInterval: 0.02)
+                }
+            }
+        }
+    }
+    
+    func setProgressOne(progessRate: Double){
+        taskOneProgressValue = taskOneProgressValue + Float(progessRate)
+        taskProgressOne.setProgress(Float(taskOneProgressValue), animated: true)
+        print(taskOneProgressValue)
+        if taskOneProgressValue >= 0.99{
+            taskProgressOne.progressTintColor = UIColor.green
+        }
+    }
+    
+    func setProgressTwo(progessRate: Double){
+        taskTwoProgressValue = taskTwoProgressValue + Float(progessRate)
+        taskProgressTwo.setProgress(Float(taskTwoProgressValue), animated: true)
+        if taskTwoProgressValue >= 0.99{
+            taskProgressTwo.progressTintColor = UIColor.green
+        }
+    }
+    
+    func setProgressThree(progessRate: Double){
+        taskThreeProgressValue = taskThreeProgressValue + Float(progessRate)
+        taskProgressThree.setProgress(Float(taskThreeProgressValue), animated: true)
+        if taskThreeProgressValue >= 0.99{
+            taskProgressThree.progressTintColor = UIColor.green
+        }
+    }
+    func setProgressFour(progessRate: Double){
+        taskFourProgressValue = taskFourProgressValue + Float(progessRate)
+        taskProgressFour.setProgress(Float(taskFourProgressValue), animated: true)
+        if taskFourProgressValue >= 0.99{
+            taskProgressFour.progressTintColor = UIColor.green
+        }
+    }
+    
+    func setOverallProgress(progessRate: Double){
+        progressValue = progressValue + Float(progessRate)
+        mainDownloadPrgress.setProgress(Float(progressValue), animated: true)
+    }
+    
+    
+    
+
+    
+    
+    
+    
+  
+    
     
     @IBAction func downloadButtonPressed(_ sender: Any) {
         showAlert()
@@ -116,3 +213,4 @@ class ViewController: UIViewController {
      taskProgressFour.progress = taskFourProgressValue
  }
  */
+
