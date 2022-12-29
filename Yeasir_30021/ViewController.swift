@@ -22,7 +22,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var taskProgressThree: UIProgressView!
     @IBOutlet weak var taskProgressFour: UIProgressView!
     
-    var v2: Float = 0.0
+    
     let customSerialQ = DispatchQueue(label: "com.custom.serial")
     
     let globalQ = DispatchQueue.global()
@@ -42,8 +42,17 @@ class ViewController: UIViewController {
         configUI()
     }
     
-     
-    
+    @IBAction func downloadButtonPressed(_ sender: Any) {
+    self.resetProgress()
+    showAlert()
+    }
+
+}
+
+
+
+// MARK: - Q config
+extension ViewController{
     fileprivate func resetProgress() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else{return}
@@ -58,10 +67,13 @@ class ViewController: UIViewController {
         
         self.taskOneProgressValue = 0.00
         self.taskProgressOne.progress = self.taskOneProgressValue
+        
         self.taskTwoProgressValue = 0.00
         self.taskProgressTwo.progress = self.taskTwoProgressValue
+        
         self.taskThreeProgressValue = 0.00
         self.taskProgressThree.progress = self.taskThreeProgressValue
+        
         self.taskFourProgressValue = 0.00
         self.taskProgressFour.progress = self.taskFourProgressValue
     }
@@ -200,31 +212,14 @@ class ViewController: UIViewController {
         mainDownloadPrgress.setProgress(Float(progressValue), animated: false)
     }
     
-    
-    
-    @IBAction func downloadButtonPressed(_ sender: Any) {
-    self.resetProgress()
-    showAlert()
-    }
-    
-    
-    
-    fileprivate func configUI() {
-        topView.layer.cornerRadius = 20
-        topView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        tasksView.layer.cornerRadius = 8
-        
-        downloadsView.layer.cornerRadius = 8
-        
-        mainDownloadPrgress.transform = mainDownloadPrgress.transform.scaledBy(x: 1, y: 8)
-        
-        taskProgressOne.transform = taskProgressOne.transform.scaledBy(x: 1, y: 5)
-        taskProgressTwo.transform = taskProgressTwo.transform.scaledBy(x: 1, y: 5)
-        taskProgressThree.transform = taskProgressThree.transform.scaledBy(x: 1, y: 5)
-        taskProgressFour.transform = taskProgressFour.transform.scaledBy(x: 1, y: 5)
-    }
-    
-    
+}
+
+
+
+
+// MARK: - Alert controller
+
+extension ViewController{
     func showAlert(){
         let alertVC = UIAlertController(title: "Available Actions", message: "Select Actions",  preferredStyle: .actionSheet)
         let globalQueueConcurrentSync = UIAlertAction(title: "Global Sync", style: .default){ [weak self]_ in
@@ -259,8 +254,33 @@ class ViewController: UIViewController {
             alertVC.addAction(goBackAction)
             present(alertVC, animated: true)
         }
-
 }
+
+
+
+// MARK: - UI Configuration
+
+extension ViewController{
+    fileprivate func configUI() {
+        topView.layer.cornerRadius = 20
+        topView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        tasksView.layer.cornerRadius = 8
+        
+        downloadsView.layer.cornerRadius = 8
+        
+        mainDownloadPrgress.transform = mainDownloadPrgress.transform.scaledBy(x: 1, y: 8)
+        
+        taskProgressOne.transform = taskProgressOne.transform.scaledBy(x: 1, y: 5)
+        taskProgressTwo.transform = taskProgressTwo.transform.scaledBy(x: 1, y: 5)
+        taskProgressThree.transform = taskProgressThree.transform.scaledBy(x: 1, y: 5)
+        taskProgressFour.transform = taskProgressFour.transform.scaledBy(x: 1, y: 5)
+    }
+}
+
+
+
+
+
 
 /**
  if taskOneProgressValue < 1.0 {
